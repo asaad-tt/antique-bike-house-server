@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -21,7 +21,35 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    console.log("database connected");
+    // -------collection start ------
+
+    const categoriesCollection = client
+      .db("antiqueBike")
+      .collection("categories");
+    const productsCollection = client.db("antiqueBike").collection("products");
+    const bookingsCollection = client.db("antiqueBike").collection("bookings");
+
+    // -----------collection  end ------
+
+    app.get("/categories", async (req, res) => {
+      const query = {};
+      const result = await categoriesCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.get("/categories/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { category_id: id };
+      const result = await productsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    //----- booking er data database e send -----------
+    app.post("/bookings", async (req, res) => {
+      const booking = req.body;
+      console.log(booking);
+      const result = await bookingsCollection.insertOne(booking);
+      res.send(result);
+    });
   } finally {
   }
 }
