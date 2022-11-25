@@ -28,6 +28,7 @@ async function run() {
       .collection("categories");
     const productsCollection = client.db("antiqueBike").collection("products");
     const bookingsCollection = client.db("antiqueBike").collection("bookings");
+    const usersCollection = client.db("antiqueBike").collection("users");
 
     // -----------collection  end ------
 
@@ -48,6 +49,21 @@ async function run() {
       const booking = req.body;
       console.log(booking);
       const result = await bookingsCollection.insertOne(booking);
+      res.send(result);
+    });
+
+    //---------bookings er data database theke get------
+    app.get("/bookings", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const bookings = await bookingsCollection.find(query).toArray();
+      res.send(bookings);
+    });
+
+    //------- user er data database a save-----------
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      const result = await usersCollection.insertOne(user);
       res.send(result);
     });
   } finally {
