@@ -37,9 +37,9 @@ async function run() {
       const result = await categoriesCollection.find(query).toArray();
       res.send(result);
     });
-    app.get("/categories/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { category_id: id };
+    app.get("/categories/:category", async (req, res) => {
+      const category = req.params.category;
+      const query = { category: category };
       const result = await productsCollection.find(query).toArray();
       res.send(result);
     });
@@ -64,6 +64,14 @@ async function run() {
     app.post("/users", async (req, res) => {
       const user = req.body;
       const result = await usersCollection.insertOne(user);
+      res.send(result);
+    });
+
+    // ------new added products sent to database-------
+    app.post("/products", async (req, res) => {
+      const product = req.body;
+      console.log(product);
+      const result = await productsCollection.insertOne(product);
       res.send(result);
     });
   } finally {
