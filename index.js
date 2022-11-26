@@ -74,6 +74,21 @@ async function run() {
       const result = await productsCollection.insertOne(product);
       res.send(result);
     });
+
+    // ----------get all seller------------
+    app.get("/buyerseller", async (req, res) => {
+      const role = req.query.role;
+      const query = { role: role };
+      const seller = await usersCollection.find(query).toArray();
+      res.send(seller);
+    });
+
+    app.delete("/buyerseller/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    });
   } finally {
   }
 }
