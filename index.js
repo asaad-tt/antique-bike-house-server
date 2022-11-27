@@ -6,6 +6,7 @@ const app = express();
 const port = process.env.PORT || 8000;
 
 require("dotenv").config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET);
 
 // middleware
 app.use(cors());
@@ -60,6 +61,14 @@ async function run() {
       res.send(bookings);
     });
 
+    //--------payment er jonno booking data get ---------
+    app.get("/bookings/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const bookings = await bookingsCollection.findOne(query);
+      res.send(bookings);
+    });
+
     //------- user er data database a save-----------
     app.post("/users", async (req, res) => {
       const user = req.body;
@@ -75,6 +84,22 @@ async function run() {
       res.send(result);
     });
 
+    // seller get my products
+    app.get("/products", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const products = await productsCollection.find(query).toArray();
+      res.send(products);
+    });
+
+    // seller can delete any of his product
+    app.delete("/products/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await productsCollection.deleteOne(query);
+      res.send(result);
+    });
+
     // ----------get all seller------------
     app.get("/buyerseller", async (req, res) => {
       const role = req.query.role;
@@ -83,11 +108,28 @@ async function run() {
       res.send(seller);
     });
 
+    //------ admin can delete any seller or buyer ------
     app.delete("/buyerseller/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await usersCollection.deleteOne(query);
       res.send(result);
+    });
+
+    // --------------- stripe ---------------------------
+    app.post("/create-payment-intent", async (req, res) => {
+      const booking = req.body;
+      const price = booking.price;
+      const amount = price * 100;
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        currency: "usd",
+        amount: amount,
+        payment_method_types: ["card"],
+      });
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
     });
   } finally {
   }
