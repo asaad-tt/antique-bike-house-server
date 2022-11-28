@@ -51,6 +51,7 @@ async function run() {
     const bookingsCollection = client.db("antiqueBike").collection("bookings");
     const usersCollection = client.db("antiqueBike").collection("users");
     const paymentsCollection = client.db("antiqueBike").collection("payments");
+    const reportsCollection = client.db("antiqueBike").collection("reports");
 
     // -----------collection  end ------
 
@@ -246,6 +247,29 @@ async function run() {
         options
       );
 
+      res.send(result);
+    });
+
+    // ==========report to admin =======================
+    // post report
+    app.post("/reports", async (req, res) => {
+      const reportData = req.body;
+      const result = await reportsCollection.insertOne(reportData);
+      res.send(result);
+    });
+
+    //------ get report data for client side-------
+    app.get("/reportedProducts", async (req, res) => {
+      const query = {};
+      const result = await reportsCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // ---------Delete data by admin----------
+    app.delete("/reportedProducts/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: ObjectId(id) };
+      const result = await reportsCollection.deleteOne(filter);
       res.send(result);
     });
     //========== end point ===========
